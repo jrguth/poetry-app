@@ -1,0 +1,38 @@
+﻿@page "/saved"
+@inject ILocalStorageService Storage
+
+<MudOverlay Visible="_loading">
+    <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+</MudOverlay>
+
+<MudText Class="mb-3" Typo="Typo.h3" Color="Color.Primary" Align="Align.Center">Saved Poems</MudText>
+<MudGrid Justify="Justify.Center">
+@foreach(Poem poem in _savedPoems)
+{
+    <MudItem Style="height: 300px" xs="8" md="6">
+        <TitleCard
+                Poem="@poem"
+                IsSaved="true">
+            </TitleCard>
+    </MudItem>
+}
+</MudGrid>
+
+
+@code {
+    private bool _loading = true;
+    private List<Poem> _savedPoems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        int total = await Storage.LengthAsync();
+        for (int i = 0; i < total; i++)
+        {
+            string key = await Storage.KeyAsync(i);
+            Poem poem = await Storage.GetItemAsync<Poem>(key);
+            _savedPoems.Add(poem);
+        }
+        _loading = false;
+        StateHasChanged();
+    }
+}

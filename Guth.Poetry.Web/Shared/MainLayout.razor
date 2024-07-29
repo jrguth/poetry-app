@@ -1,0 +1,57 @@
+﻿@inherits LayoutComponentBase
+@inject IPoetryDBClient Client
+
+<MudThemeProvider Theme="currentTheme"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudLayout>
+    <MudAppBar Elevation="10">
+        <MudButton Variant="Variant.Text">
+            <MudLink Href="/">Home</MudLink>
+        </MudButton>
+        <MudButton Variant="Variant.Text">
+            <MudLink Href="/saved">Saved</MudLink>
+        </MudButton>
+        <MudButton OnClick=NavigateToRandomPoem Variant="Variant.Text">
+            <MudLink>Random</MudLink>
+        </MudButton>
+    </MudAppBar>
+    <MudMainContent>
+        <MudContainer Class="p-4">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    [Inject] NavigationManager Nav { get; set; }
+    bool _drawerOpen = false;
+    MudTheme currentTheme;
+
+    MudTheme DefaultTheme = new MudTheme()
+    {
+        Palette = new PaletteLight()
+        {
+            Primary = Colors.Pink.Darken4,
+            Background = Colors.Shades.White,
+            AppbarBackground = Colors.Pink.Lighten5,
+        }
+    };
+
+    protected override void OnInitialized()
+    {
+        currentTheme = DefaultTheme;
+    }
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private async Task NavigateToRandomPoem()
+    {
+        Poem poem = (await Client.GetRandomTitles(1)).First();
+        Nav.NavigateTo($"/titles/{poem.Title}");
+    }
+}

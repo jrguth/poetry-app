@@ -1,0 +1,17 @@
+﻿@inject IPoetryDBClient Client
+
+<MudNavMenu>
+    <MudNavLink Href="/">Home</MudNavLink>
+    <MudNavLink @onclick=NavigateToRandomPoem>Random Poem</MudNavLink>
+    <MudNavLink Href="/saved">Saved Poems</MudNavLink>
+</MudNavMenu>
+
+@code {
+    [Inject] NavigationManager Nav { get; set; }
+
+    private async Task NavigateToRandomPoem()
+    {
+        Poem poem = (await Client.GetRandomTitles(1)).First();
+        Nav.NavigateTo($"/titles/{poem.Title}");
+    }
+}

@@ -1,0 +1,42 @@
+﻿@page "/titles/{titleName}"
+@inject IPoetryDBClient Client
+@inject ISnackbar Snackbar
+@inject ILocalStorageService Storage
+
+<MudOverlay Visible="_poem == null">
+    <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+</MudOverlay>
+
+@if(_poem != null)
+{
+    <TitleCard
+        Poem="_poem"
+        IsSaved="_cachedPoem != null"
+        OnSaveClicked="SavePoem">  
+    </TitleCard>
+}
+
+@code {
+    [Parameter] public string TitleName { get; set; }
+    [Inject] public NavigationManager Nav { get; set; }
+
+    private Poem _poem;
+    private Poem _cachedPoem;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _cachedPoem = await Storage.GetItemAsync<Poem>(TitleName);
+        _poem = _cachedPoem ?? await Client.GetTitle(TitleName);
+        StateHasChanged();
+    }
+
+    private async Task SavePoem()
+    {
+        if (_cachedPoem is null)
+        {
+            _cachedPoem = _poem;
+            await Storage.SetItemAsync(_cachedPoem.Title, _cachedPoem);
+        }
+        Snackbar.Add("Saved!", Severity.Success);
+    }
+}
